@@ -44,6 +44,75 @@
   
   const app = express();
   
+
+  let todos = [];
+
   app.use(bodyParser.json());
   
+  app.get('/todos', function(req, res){
+    res.json(todos);
+  });
+
+  app.get('/todos/:id', function(req, res){
+    let todo;
+    todos.map((t)=>{
+      console.log(t);
+      if(t.id == req.params.id){
+        todo = t;
+      }
+    })
+    if (!todo) {
+      res.status(404).send();
+    } else {
+      res.json(todo);
+    }
+  });
+
+  app.post('/todos', function(req, res){
+    const todo = {
+       title : req.body.title,
+       description : req.body.description,
+       id : Math.floor(Math.random() * 1000000)
+    }
+    
+    todos.push(todo);
+    res.status(201).json(todo);
+
+  });
+
+  app.put('/todos/:id', function(req, res){
+    const index = todos.findIndex(t => t.id === parseInt(req.params.id));
+    if(index == -1){
+      res.status(404).send()
+    }else{
+      if(req.body.title){
+        todos[index].title = req.body.title;
+      }
+      if(req.body.description){
+        todos[index].description = req.body.description;
+      }
+      res.json(todos[index]);
+    }
+
+  });
+
+  app.delete('/todos/:id', function(req, res){
+    const index = todos.findIndex(t => t.id === parseInt(req.params.id));
+    if(index == -1){
+      res.status(404).send()
+    }else{
+      todos.splice(index,1);
+      res.status(200).send();
+    }
+
+  });
+
+
+  app.use((req, res, next) => {
+    res.status(404).send();
+  });
+
+  app.listen(3001, ()=>{
+    console.log("listening 3001")
+  })
   module.exports = app;
